@@ -1,5 +1,4 @@
-# Electweet
-
+# Tweetkraken
 A simple Twitter feed built with Electron + React.
 
 ## Build
