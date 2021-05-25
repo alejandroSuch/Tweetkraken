@@ -1,0 +1,106 @@
+.tweet:not(.retweeted){
+    background-color: #fff;
+    padding: 16px;
+    border-radius: 8px;
+    margin: 8px 0px;
+    width: 100%;
+    box-shadow: 0px 6px 8px -1px rgba(0,0,0,0.1);
+}
+.tweet a{
+    text-decoration: none;
+    color: #3c95fa;
+    font-weight: 600;
+}
+.tweet > .tweet-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    cursor: default;
+    user-select: none;
+}
+.tweet > .tweet-header > .text-group{
+    margin: 0px 8px;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    cursor: default;
+    user-select: none;
+}
+.tweet > .tweet-header > .profile-picture{
+    --size: 48px;
+    flex: var(--size) 0 0;
+    border-radius: 50%;
+    width: var(--size);
+    height: var(--size);
+    overflow: hidden;
+    position: relative;
+}
+.tweet > .tweet-header > .profile-picture::before{
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    box-shadow: inset 0px 0px 8px rgba(0,0,0,1);
+}
+.tweet > .tweet-header > .profile-picture > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.tweet > .tweet-header > .text-group > .user-name{
+    margin: 0px 4px 0px 0px;
+    font-weight: 600;
+}
+.tweet > .tweet-header > .text-group > .alias{
+    color: #888;
+}
+.tweet > .tweet-header > .text-group > .created-at{
+    color: #888;
+}
+.tweet > .tweet-body{
+    word-break: break-word;
+}
+.tweet > .tweet-body > .retweeted{
+    border: 1px solid #eaeaea;
+    padding: 8px;
+    margin-top: 8px;
+    border-radius: 4px;
+}
+.tweet > .metrics {
+    margin-top: 8px;
+    font-size: 14px;
+    line-height: 16px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    color: rgb(91, 112, 131);
+}
+.tweet > .metrics > span{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0px 8px 0px 0px;
+}
+.tweet .icon {
+    width: 16px;
+    height: 16px;
+    margin: 4px;
+}
+.tweet .icon.verified{
+    color: #fff;
+    fill: #3c95fa;
+    height: 24px;
+    width: 24px;
+}
+.tweet .icon.verified path{
+    stroke-width: 2;
+    
+}

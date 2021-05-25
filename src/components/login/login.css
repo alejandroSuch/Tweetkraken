@@ -1,0 +1,61 @@
+.login-screen{
+    width: 60vw;
+    min-height: 60vh;
+    background-color: #fff;
+    margin: 20vh auto;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-screen button{
+    background-color: #63abd4;
+    color: #fff;
+    font-weight: 600;
+    border: 0px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.login-screen button:hover{
+    background-color: #4d96c0;
+}
+.login-screen .app-logo{
+    height: 120px;
+    width: auto;
+}
+.login-screen h1{
+    color: #47928c;
+    font-family: 'Lato';
+    font-weight: 100;
+    font-size: 48px;
+    margin: 8px 0px;
+}
+.login-screen p {
+    color: #666;
+    font-weight: 600;
+}
+.login-screen .icon{
+    width: 48px;
+    height: 48px;
+    margin: 16px 8px;
+    color: #56b2e7;
+    fill: #72c4f3;
+}
+.login-screen .icon path{
+    stroke-width: 0;
+}
+
+.login-screen span{
+    color: #555;
+}
+
+.login-screen span.link{
+    color: #333;
+    text-decoration: underline;
+    cursor: pointer;
+}

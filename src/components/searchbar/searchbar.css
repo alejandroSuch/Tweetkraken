@@ -1,0 +1,128 @@
+.searchbar-wrapper{
+    height: 40px;
+    width: 100%;
+    position: relative;
+}
+.searchbar-wrapper > input[type="text"] {
+    width: 100%;
+    height: 100%;
+    border: 0px;
+    box-shadow: inset 0px 0px 8px -1px rgba(0,0,0,0.3);
+    background-color: #fefefe;
+    color: #888;
+    outline: none;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 16px;
+}
+.searchbar-wrapper:focus-within > input[type="text"]{
+    box-shadow: 0px 2px 4px -1px rgba(0,0,0,0.1), 0px 8px 16px -1px rgba(0,0,0,0.05);
+    background-color: #fff;
+    color: #222;
+    border-radius: 4px 4px 0px 0px;
+}
+.searchbar-wrapper.error > input[type="text"]{
+    border: 1px solid #ffa4a4;
+    background-color: #ffe2e2;
+    color: rgb(172, 75, 75);
+}
+
+.searchbar-wrapper > .history {
+    display: none;
+}
+
+.searchbar-wrapper:hover > .history,
+.searchbar-wrapper:focus-within > .history{
+    position: absolute;
+    z-index: 2;
+    bottom: 0px;
+    transform: translateY(100%);
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 100%;
+    padding: 8px;
+    border-radius: 0px 0px 4px 4px;
+    background-color: #fff;
+    box-shadow: 0px 8px 8px -1px rgba(0,0,0,0.1);
+}
+
+
+.searchbar-wrapper > .history > .history-element {
+    padding: 8px;
+    cursor: pointer;
+    width: 100%;
+    position: relative;
+}
+.searchbar-wrapper > .history > .history-element > .delete{
+    position: absolute;
+    font-size: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 8px;
+    width: 16px;
+    height: 16px;
+    line-height: 14px;
+    text-align: center;
+    color: #aaa;
+}
+.searchbar-wrapper > .history > .history-element > .delete:hover{
+    background-color: #eaeaea;
+    color: #aaa;
+    border-radius: 4px;
+}
+.searchbar-wrapper > .history > .history-element:hover,
+.searchbar-wrapper > .history > .history-element:focus {
+    background-color: #f5f5f5;
+    outline: none;
+}
+
+.searchbar-wrapper > .history > .history-element:not(:last-child) {
+    border-bottom: 1px solid #eee;
+}
+
+
+.searchbar-wrapper + .error-desc{
+    display: none;
+}
+.searchbar-wrapper.error + .error-desc{
+    display: block;
+    color: rgb(151, 34, 34);
+    font-weight: 600;
+}
+.searchbar-wrapper > .indicators {
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: nowrap;
+    top: 50%;
+    right: 16px;
+    transform: translateY(-50%);
+    height: 24px;
+    width: auto;
+}
+.searchbar-wrapper > .indicators > .loading > svg,
+.searchbar-wrapper > .indicators > .reset{
+    height: 24px;
+    width: 24px;
+    color: #aaa;
+    cursor: pointer;
+    text-align: center;
+}
+
+.searchbar-wrapper > .indicators > .reset{
+    line-height: 22px;
+    font-size: 16px;
+    padding: 0px;
+    border: 0px;
+    background-color: transparent;
+}
+.searchbar-wrapper > .indicators > .reset:hover{
+    background-color: #eaeaea;
+    color: #aaa;
+    border-radius: 4px;
+}

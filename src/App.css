@@ -1,0 +1,24 @@
+*{
+  box-sizing: border-box;
+}
+body{
+  background: #4d96c0;
+  font-size: 14px;
+}
+.App{
+  font-family: 'Lato','Ubuntu', 'Roboto', sans-serif;
+  position: relative;
+  padding: 0px 0px 24px 0px;
+  width: 100vw;
+  height: 100vh;
+  margin: 0 auto;
+}
+.App > .user-profile {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 9999;
+}
+.App.hide-contents{
+  visibility: hidden;
+}

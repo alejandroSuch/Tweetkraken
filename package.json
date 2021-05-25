@@ -1,0 +1,113 @@
+{
+  "name": "Tweetkraken",
+  "author": "Sergio Leonardo Maciá Sempere <sermacsem@gmail>",
+  "description": "A simple Twitter feed built with Electron + React.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "axios": "^0.21.1",
+    "electron-is-dev": "^2.0.0",
+    "electron-twitter-oauth": "^0.0.2",
+    "moment": "2.29.1",
+    "node-twitter-api": "^1.8.0",
+    "oauth": "^0.9.15",
+    "oauth-electron-twitter": "^1.0.124",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "react-scripts": "2.1.8",
+    "twitter": "^1.7.1"
+  },
+  "devDependencies": {
+    "@types/jest": "26.0.23",
+    "@wojtekmaj/enzyme-adapter-react-17": "0.6.1",
+    "concurrently": "6.1.0",
+    "electron": "12.0.9",
+    "electron-builder": "22.10.5",
+    "enzyme": "3.11.0",
+    "jest": "23.6.0",
+    "react-test-renderer": "17.0.2",
+    "wait-on": "5.3.0"
+  },
+  "main": "public/electron.js",
+  "homepage": "./",
+  "scripts": {
+    "dev": "concurrently -k -n \"React,Electron\" -c \"blue,green\" \"BROWSER=none npm run start-react\" \"npm run start-electron\"",
+    "start-react": "react-scripts start",
+    "start-electron": "wait-on http://localhost:3000 && npm run electron-dev",
+    "build": "npm run build-react && npm run build-electron",
+    "build-all": "npm run build-react && concurrently -k -n \"Windows, Mac, Linux\" -c \"blue,white,yellow\" \"npm run build-electron-win\" \"npm run build-electron-mac\" \"npm run build-electron-lin\"",
+    "build-react": "react-scripts build",
+    "build-electron": "electron-builder",
+    "build-electron-lin": "npm run build-react && electron-builder -l",
+    "build-electron-mac": "npm run build-react && electron-builder -m",
+    "build-electron-win": "npm run build-react && electron-builder -w",
+    "test": "react-scripts test --env=jsdom",
+    "electron-dev": "ELECTRON_START_URL=http://localhost:3000 electron .",
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
+  },
+  "postinstall": "electron-builder install-app-deps",
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "build": {
+    "appId": "com.tweetkraken.app",
+    "productName": "TweetKraken",
+    "copyright": "2021 - ${author}",
+    "files": [
+      "dist/",
+      "node_modules/",
+      "index.html",
+      "package.json"
+    ],
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "type": "distribution",
+      "hardenedRuntime": true,
+      "entitlements": "assets/entitlements.mac.plist",
+      "entitlementsInherit": "assets/entitlements.mac.plist",
+      "gatekeeperAssess": false
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "target": [
+        "portable"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Development"
+    },
+    "directories": {
+      "output": "release"
+    }
+  }
+}
