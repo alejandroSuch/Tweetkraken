@@ -26,7 +26,8 @@ Run this to generate the application in your local platform.
     npm run build
 ```
 You can also run the following scripts for each platform:
-    - ``npm run build-electron-win`` : Build for Windows
-    - ``npm run build-electron-lin`` : Build for Linux
-    - ``npm run build-electron-mac`` : Build for MacOS
-    - ``npm run build-all`` : Build for all the platforms above
+
+- ``npm run build-electron-win`` : Build for Windows
+- ``npm run build-electron-lin`` : Build for Linux
+- ``npm run build-electron-mac`` : Build for MacOS
+- ``npm run build-all`` : Build for all the platforms above
