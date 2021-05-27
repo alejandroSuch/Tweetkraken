@@ -72,10 +72,10 @@ ipcMain.on('tweet-search', (event, arg) => {
   })
 })
 
-ipcMain.on('tweet-more', (event, {str, token}) => {
+ipcMain.on('tweet-more', (event, {str, token, user_id = null}) => {
   twitter.searchTweets(str.toString(), 10, token, data => {
     event.reply('tweet-more-results', data)
-  })
+  }, user_id)
 })
 
 ipcMain.on('login-req', (event) => {

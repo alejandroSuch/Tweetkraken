@@ -1,6 +1,7 @@
 import React from 'react'
 import moment from 'moment'
 import './tweet.css'
+
 import RetweetedStatus from './tweet'
 import {ReactComponent as HeartIcon} from './source_icons_heart.svg'
 import {ReactComponent as RTIcon} from './source_icons_repeat.svg'
@@ -26,36 +27,47 @@ function Tweet({tweet: t, retweeted = false}) {
     }
 
     function processedTweet(){
-        if(!t.entities) return t.text;
-        let replacements = [];
-        Object.keys(t.entities).forEach( ent => {
-            if(ent !== 'annotations'){
-                replacements = [ ...replacements, ...t.entities[ent]]
-            }
-        });
-        //Sort replacements from end -> start
-        replacements.sort((a, b) => a.start < b.start ? -1 : ( a.start > b.start ? 1 : 0));
         let tmpStr = t.text;
-        let link;
-        let r = replacements.pop();
-        const replace = (r, link) => {
-            if(r.indices){
-                tmpStr = replaceBetween(tmpStr, r.indices[0], r.indices[1], link);
-            }else{
-                tmpStr = replaceBetween(tmpStr, r.start, r.end, link);
+        if(!t.entities) return t.text;
+        else {
+            let replacements = [];
+            Object.keys(t.entities).forEach( (key, k) => {
+                if(key !== 'annotations'){
+                    t.entities[key].forEach( (item, i) => {
+                        if(!item.indices && item.start !== undefined && item.end !== undefined){
+                            t.entities[key][i] = {
+                                ... item,
+                                indices: [item.start, item.end] // Back-compatibility with Twitter API v1
+                            }; 
+                        }
+                    })
+                    replacements = [
+                        ...replacements,
+                        ...t.entities[key]
+                    ]
+                }
+            })
+            replacements
+                .sort((a,b)=>a.indices[0] - b.indices[0])
+                .reverse();
+            let i = 0;
+            let link = '';
+            let r = null;
+            while(replacements[i]){
+                r = replacements[i];
+                let [start, end] = r.indices;
+                if(r.tag){ //Hashtag
+                    link = `<a href="https://twitter.com/hashtag/${r.tag}" target="_window">#${r.tag}</a>`;
+                }else if(r.url){ //Link
+                    link = `<a href="${r.url}" target="_window">${r.display_url}</a>`;
+                }else if(r.username){ //Hashtag
+                    link = `<a href="https://twitter.com/${r.username}" target="_window">@${r.username}</a>`;
+                }
+                tmpStr = replaceBetween(tmpStr, start, end, link);
+                i++;
             }
         }
-        while(r){
-            if(r.tag){ //Hashtag
-                link = `<a href="https://twitter.com/hashtag/${r.tag}" target="_window">#${r.tag}</a>`;
-            }else if(r.url){ //Link
-                link = `<a href="${r.url}" target="_window">${r.display_url}</a>`;
-            }else if(r.username){ //Hashtag
-                link = `<a href="https://twitter.com/${r.username}" target="_window">@${r.username}</a>`;
-            }
-            replace(r, link);
-            r = replacements.pop()
-        }
+        
         return <div dangerouslySetInnerHTML={{
             __html: tmpStr
         }}></div>;

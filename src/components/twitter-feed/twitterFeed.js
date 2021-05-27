@@ -8,13 +8,27 @@ function TwitterFeed({userProfile}) {
     const [nextPage, setNextPage] = useState(null);
     const [searchStr, setSearchStr] = useState(null);
     const [lastTweet, setLastTweet] = useState(null);
+    const [userTimeline, setUserTimeline] = useState(null);
+    const [emptyResults, setEmptyResults] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [searchError, setSearchError] = useState(null);
 
     useEffect(()=>{ //Set initial listener for tweets once.
         window.api.receive('tweet-response', data => {
-            setNextPage(data.meta.next_token);
-            setTweets(data.data);
+            console.log(data)
+            if(data.meta.result_count < 1){
+                setTweets([]);
+                setEmptyResults(true)
+            }else{
+                setEmptyResults(false)
+                if(data.meta.next_token)
+                    setNextPage(data.meta.next_token);
+                setTweets(data.data);
+                console.log(data);
+            }
+            if(data.userID){
+                setUserTimeline(data.userID);
+            }
             setIsLoading(false);
         })
         if(userProfile){
@@ -30,6 +44,7 @@ function TwitterFeed({userProfile}) {
         setLastTweet(null);
         if(searchStr.length > 1) {
             window.api.send('tweet-search', searchStr);
+            setUserTimeline(null);
             setIsLoading(true);
             setSearchError(null);
         }else{
@@ -44,7 +59,7 @@ function TwitterFeed({userProfile}) {
     }, [tweets]);
 
     const loadMore = () => {
-        window.api.send('tweet-more', {str: searchStr, token: nextPage});
+        window.api.send('tweet-more', {str: searchStr, token: nextPage, user_id: userTimeline});
         setIsLoading(true);
         window.api.receive('tweet-more-results', data => {
             setNextPage(data.meta.next_token);
@@ -67,7 +82,9 @@ function TwitterFeed({userProfile}) {
                 }
                 {tweets.length < 1 && 
                 <div className="empty-feed">
-                The feed is empty! Type something to begin searching.
+                { emptyResults ? 
+                    <span className="no-results">Oops! It looks like your search did not give any results. Try rephrasing your search, or type similar words.</span> 
+                    : 'The feed is empty! Type something to begin searching.'}
                 </div>}
             </div>
         </div>

@@ -1,4 +1,5 @@
 const request = require('request')
+const sync_request = require('request-promise')
 const {BrowserWindow} = require('electron')
 const OAuth = require('oauth');
 const auth = require('./twitter-login');
@@ -55,7 +56,7 @@ module.exports = class TwitterClient {
                 //'attachments.poll_ids',
                 'attachments.media_keys',
                 'author_id',
-                'geo.place_id',
+                //'geo.place_id',
                 'in_reply_to_user_id',
                 'referenced_tweets.id',
                 'entities.mentions.username',
@@ -98,6 +99,104 @@ module.exports = class TwitterClient {
         return Object.keys(json).map(key => key + '=' + encodeURIComponent(json[key])).join('&')
     }
     
+    /*
+        This function is simplified in order to work for the demo.
+        However, here's a hint of what it could evolve to in the future.
+        @Improvements:
+            - For a search such: 
+                '@someone Charizard sucks, #teamBlue for the win' 
+            The function should return:
+                - A list of entities  {
+                    users: ['someone'],
+                    tags: ['teamBlue'],
+                    queries: [
+                        'charizard', 'sucks', 'for', 'the', 'win'
+                    ]
+                }
+            Build a filtered search (get tweets from 'someone' inside the 'teamBlue' tag, including terms from the queries)
+    */
+    processSearch(query){
+        //Get query by words
+        let words = query.split(' ');
+        // Retrieve first character of the first word, ignore the other words (See @Improvements).
+        let symbol = words[0].charAt(0); 
+
+        switch(symbol){
+            case '#': 
+                return ['hashtag', words[0].slice(1)]
+            case '@': 
+                return ['user', words[0].slice(1)]
+            default: 
+                return ['tweet', query] // Defaults to generic tweet search
+        }
+    }
+
+    requestTweet(options, callback){
+        request(options, function (error, response) {
+            if (error) throw new Error(error);
+            /* - Tweet Structure:
+                {
+                    data: {}, // Tweets
+                    includes: {}, // Attachments: Users, quotes, pictures, referenced tweets
+                    meta:{} //Tokens, indexation
+                }
+            */
+            let res = { //Fill with defaults to prevent object[key] access errors
+                data: [],
+                meta: {
+                    result_count: 0
+                } ,
+                ... JSON.parse(response.body) //Expand and overwrite with API call
+            }
+            if(res.meta.result_count < 1){
+                callback({
+                    data: [],
+                    meta: res.meta
+                });
+                return;
+            }
+            res.data.forEach( (tweet, i) => {
+                res.data[i]['author'] = { // Expand the user inside the tweet object
+                    ... res.includes.users.find( f => f.id === tweet.author_id)
+                }
+                if(tweet.referenced_tweets){
+                    let ref = tweet.referenced_tweets;
+                    ref.forEach( (retweet, j) => {
+                        res.data[i].referenced_tweets[j] = {
+                            ...retweet,
+                            ...res.includes.tweets.find( f => f.id === retweet.id ) //Find included tweet and expand data
+                        }
+                    } )
+                }
+            });
+
+            callback({
+                data: res.data,
+                meta: res.meta
+            });
+        });
+    }
+
+    fetchTweetSearch(query, max_results, next, callback) {
+        if (query === '') return;
+        
+        const params = {
+            ...this.apiConfig,
+            query,
+            max_results,
+            ... next ? {next_token: next} : null
+        }
+
+        const options = {
+            'method': 'GET',
+            'url':  `https://api.twitter.com/2/tweets/search/recent?${this.parseToURLParams(params)}`,
+            'headers': {
+                ...this.headers
+            }
+        };
+        this.requestTweet(options, callback);
+    }
+
     fetchUserProfile(callback){
         this.oauth.get(
             'https://api.twitter.com/1.1/account/verify_credentials.json',
@@ -108,6 +207,65 @@ module.exports = class TwitterClient {
                 callback(data);  //Return user profile
             }
         );
+    }
+
+    async fetchUserID(username){
+        if (username === '') return;
+        
+        const params = {
+            'user.fields': 'id', //this.apiConfig['user.fields']
+        }
+        
+        const options = {
+            'method': 'GET',
+            'url':  `https://api.twitter.com/2/users/by/username/${encodeURIComponent(username)}?${this.parseToURLParams(params)}`,
+            'headers': {
+                ...this.headers
+            }
+        };
+        let response = await sync_request(options);
+        let content = JSON.parse(response);
+
+        if(content.data && content.data.id){
+            return content.data.id;
+        }else{
+            return false;
+        }
+    }
+
+    async fetchUserSearch(username, max_results, next, callback, user_id = null){
+        if (username === '') return;
+        
+        //Skip the id fetching if you already know where to look (ie. next page token)
+        let id = user_id || await this.fetchUserID(username);
+
+        if(!id){
+            callback({
+                data: [],
+                meta: {result_count: 0}
+            });
+            return;
+        }
+
+        const params = {
+            ...this.apiConfig,
+            max_results,
+            ... next ? {pagination_token: next} : null
+        }
+        
+        const options = {
+            'method': 'GET',
+            'url':  `https://api.twitter.com/2/users/${encodeURIComponent(id)}/tweets?${this.parseToURLParams(params)}`,
+            'headers': {
+                ...this.headers
+            }
+        };
+        this.requestTweet(options, data => {
+            callback({
+                ...data,
+                userID: id
+            })
+        });
     }
     
     fetchUserTimeline(callback){
@@ -158,54 +316,25 @@ module.exports = class TwitterClient {
         }
     }
 
-    searchTweets(query, max_results, next, callback) {
+    searchTweets(query, max_results, next, callback, user_id = null) {
         if (query === '') return;
         
-        const params = {
-            ...this.apiConfig,
-            query,
-            max_results,
-            ... next ? {next_token: next} : null
+        // Analyze the type of search the user is doing
+        let [searchType, searchQuery] = this.processSearch(query); // Returns Array(2) -> [type, query]
+
+        switch(searchType){
+            case 'user': 
+                this.fetchUserSearch(searchQuery, max_results, next, callback, user_id)
+                break;
+            case 'hashtag': 
+                // Same as tweet search, but we separate it for future use and differentiation in our app,
+                // or in case the Twitter API changes and we need to fetch them differently
+                this.fetchTweetSearch(searchQuery, max_results, next, callback)
+                break;
+            case 'tweet': default: // Call tweet search by default
+                this.fetchTweetSearch(searchQuery, max_results, next, callback)
+                break;
         }
-
-        const options = {
-            'method': 'GET',
-            'url':  `https://api.twitter.com/2/tweets/search/recent?${this.parseToURLParams(params)}`,
-            'headers': {
-                ...this.headers
-            }
-        };
-        request(options, function (error, response) {
-            if (error) throw new Error(error);
-            /* - Structure:
-                {
-                    data: {}, // Tweets
-                    includes: {}, // Attachments: Users, quotes, pictures, referenced tweets
-                    meta:{} //Tokens, indexation
-                }
-            */
-            let res = JSON.parse(response.body);
-            res.data.forEach( (tweet, i) => {
-                res.data[i]['author'] = { // Expand the user inside the tweet object
-                    ... res.includes.users.find( f => f.id === tweet.author_id)
-                }
-                if(tweet.referenced_tweets){
-                    let ref = tweet.referenced_tweets;
-                    ref.forEach( (retweet, j) => {
-                        res.data[i].referenced_tweets[j] = {
-                            ...retweet,
-                            ...res.includes.tweets.find( f => f.id === retweet.id ) //Find included tweet and expand data
-                        }
-                    } )
-                }
-            });
-
-
-            callback({
-                data: res.data,
-                meta: res.meta
-            });
-        });
     }
 
     extendParams(params) {

@@ -45,7 +45,11 @@
     text-align: center;
     font-weight: 600;
 }
-
+.twitter-feed > .main-container > .empty-feed > .no-results{
+    font-size: 1.2em;
+    color: #666;
+    max-width: 80%;
+}
 .twitter-feed .load-more {
     background-color: transparent;
     border: 2px solid #fff;
