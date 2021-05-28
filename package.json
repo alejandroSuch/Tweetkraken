@@ -16,6 +16,7 @@
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-scripts": "2.1.8",
+    "request-promise": "^4.2.6",
     "twitter": "^1.7.1"
   },
   "devDependencies": {
